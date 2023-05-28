@@ -1,0 +1,128 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>電卓</title>
+</head>
+<body>
+<h3>電卓</h3>
+<hr>
+<form name="calc">
+<table border="2">
+
+<!--計算結果を表示する-->
+<tr>
+    <th colspan="3" align="right"><div id="output">0</div></th>
+    <th><div id="type"></div></th>
+</tr>
+
+<!--1)電卓用のテーブルを作成-->
+<!--2)ボタンを配置する -->
+<!--3)ボタンに文字を入れる-->
+<tr>
+    <td><input type="button" value="７" onClick="calc_run(7)"></td>
+    <td><input type="button" value="８" onClick="calc_run(8)"></td>
+    <td><input type="button" value="９" onClick="calc_run(9)"></td>
+    <td><input type="button" value="÷" onClick="calc_run('/')"></td>
+</tr>
+<tr>
+    <td><input type="button" value="４" onClick="calc_run(4)"></td>
+    <td><input type="button" value="５" onClick="calc_run(5)"></td>
+    <td><input type="button" value="６" onClick="calc_run(6)"></td>
+    <td><input type="button" value="×" onClick="calc_run('*')"></td>
+</tr>
+<tr>
+    <td><input type="button" value="１" onClick="calc_run(1)"></td>
+    <td><input type="button" value="２" onClick="calc_run(2)"></td>
+    <td><input type="button" value="３" onClick="calc_run(3)"></td>
+    <td><input type="button" value="－" onClick="calc_run('-')"></td>
+</tr>
+<tr>
+    <td><input type="button" value="０" onClick="calc_run(0)"></td>
+    <td><input type="button" value="・" onClick="calc_run('.')"></td>
+    <td><input type="button" value="＝" onClick="calc_equal()"></td>
+    <td><input type="button" value="＋" onClick="calc_run('+')"></td>
+</tr>
+
+</table>
+</form>
+
+<script language="javascript">
+//電卓処理の特徴
+//数字➀→記号➁→数字➂→記号➃→数字⓹→記号⑥ 　数字と記号の入力が交互に行う
+//４変数準備："１つ前の計算結果"、"１つ前の記号"、"直前に入力された数値"、"次の記号"
+    //変数１ ans：計算中の数字を入れる変数。初期値0
+    //変数２ num：押された数字のキー(文字列)を順番に記録する
+    //変数３ key：１つ前に押されたキーを記録。数字の連続を確認するために使用
+    //変数４ kigou：その前に押された記号ボタン
+//数字➀：数字を画像表示。数字の連続は桁上がり
+//記号➁：記号入力時、eval(ans + kigou + num)で四則演算をする。演算結果→ans
+//尚、kigouが""の場合、"+"に書替える
+//数字➂：数字を画像表示。数字の連続は桁上がり
+//記号➃：記号入力時、eval(ans + kigou + num)で四則演算をする。演算結果→ans
+//以降、➂➃の繰り返し
+
+    ans = 0;    //計算中の数字を入れる変数
+    num = "0";  //押された数字のキー(文字列)を順番に記録する
+    key = "";       //１つ前に押されたキーを記録するための変数
+    kigou = "";    //その前に押された記号
+    function calc_run(btn) {   //ボタンからのイベントを受けるための関数
+        if (!isNaN(btn)) {  //btnが数値である場合
+
+            if (!isNaN(key)) {   //１つ前に押されたキーが数値なら
+                if (num == "0") {   //押された数字のキー(文字列)が"0"なら
+                    num = ""+btn;   //"0"は除いてbtnの数値(文字列)を書き込む
+                } else {
+                    num += ""+btn;  //numの語尾にbtn(文字列)を連結する
+                }
+                // ""の意味：「""」を挟んでbtn数値を文字列として代入
+            } else {        //１つ前に押されたキーが数値でないなら
+                num = ""+btn;   //最初の数値(文字列)をnumに入れる
+            }
+            //DOMを使い、電卓左上にnum値を表示する
+            document.getElementById("output").innerHTML = num;
+
+        } else {    //btnが数値でない場合
+            console.log(ans);
+            console.log(kigou);
+            console.log(num);
+            
+            if (!isNaN(key)) {   //１つ前に押されたキーが数値なら
+                if(kigou==""){kigou="+";}
+                ans = eval(ans + kigou + num);  //evalメソッド：文字列の四則演算を行う
+                num = "0";
+                 //DOMを使い、電卓左上に計算結果を表示する
+                document.getElementById("output").innerHTML = ans;
+            } 
+            kigou = btn;
+            //DOMを使い、電卓右上のマスに記号を表示
+            document.getElementById("type").innerHTML = kigou;
+        }
+        key = btn;
+    }
+
+    //"="押下時の処理
+    function calc_equal() {
+        console.log(ans);
+        console.log(kigou);
+        console.log(num);
+
+        if (key == "=") {   //１つ前に押されたキー"="、つまり"="を連打した場合、初期化
+            ans = 0;    //計算中の数字を初期化
+            key = "";   //keyの初期化
+        } else {
+            if(kigou==""){kigou="+";}   //その前に押された記号が""の場合、"+"に書替え
+            ans = eval(ans + kigou + num);  //evalメソッド：文字列の四則演算を行う
+            key = "=";
+        }
+        num = "0";  //numを初期化
+        kigou = key;
+        //DOMを使い、電卓左上のマスに計算結果を表示
+        document.getElementById("output").innerHTML = ans;
+        //DOMを使い、電卓右上のマスに記号を表示
+        document.getElementById("type").innerHTML = key;
+    }
+</script>
+
+</body>
+</html>
